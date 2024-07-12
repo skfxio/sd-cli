@@ -21,12 +21,9 @@ def main():
     git = input(f"{bcolors.ENDC}GitHub repo origin: {bcolors.OKCYAN}")
     print(f"{bcolors.ENDC}Choose project type")
     print(f"{bcolors.OKBLUE}1{bcolors.ENDC} - aiogram3 bot")
-    print(f"{bcolors.OKBLUE}2{bcolors.ENDC} - backend {bcolors.FAIL}(not working yet!){bcolors.ENDC}")
+    print(f"{bcolors.OKBLUE}2{bcolors.ENDC} - backend")
     pr_type = int(input(f"Insert number here:  {bcolors.OKCYAN}")) - 1
     print(bcolors.ENDC)
-    
-    if pr_type == 1: 
-        quit()
     
     templates = [
         {
@@ -35,9 +32,9 @@ def main():
             "dir": "tgbot-template",
         },
         {
-            "origin": "git@github.com:skfxio/sdlib.git",
+            "origin": "git@github.com:skfxio/backend-template.git",
             "name": "backend",
-            "dir": "sdlib",
+            "dir": "backend-template",
         },
     ]
 
@@ -50,8 +47,15 @@ def main():
     print(f"Repo:{bcolors.OKGREEN}", git, bcolors.ENDC)
     print(f"Project type:{bcolors.OKGREEN}", templates[pr_type]['name'], bcolors.ENDC)
     print()
-    correct = input(f"[{bcolors.OKGREEN}y{bcolors.ENDC}/{bcolors.FAIL}n{bcolors.ENDC}]  ")
-    if correct.lower() != "y":
+    print(f"{bcolors.FAIL}It will also delete all your previous commits on branch master!{bcolors.ENDC}")
+    print()
+    correct = input(f"[{bcolors.OKGREEN}Y{bcolors.ENDC}/{bcolors.FAIL}n{bcolors.ENDC}]  ")\
+    
+    if correct.lower() == "":
+        pass
+    elif correct.lower() == "y":
+        pass
+    else:
         print(f"{bcolors.FAIL}Quiting...{bcolors.ENDC}")
         quit()
 
@@ -62,11 +66,25 @@ def main():
     os.rename(templates[pr_type]['dir'], name)
 
     os.chdir(name)
+    
+    if pr_type == 1:    # backend
+        version = input(f"Set project version {bcolors.OKGREEN}(1.0.0){bcolors.ENDC}: {bcolors.OKGREEN}")
+        if version == "": 
+            version = "1.0.0"
+        description =  input(f"{bcolors.ENDC}Set project description: {bcolors.OKGREEN}")
+        print(f"{bcolors.ENDC}\nUpdating {bcolors.OKGREEN}./app/projectConfig.py{bcolors.ENDC}...")
+        
+        with open("./app/projectConfig.py", "w", encoding="utf-8") as f:
+            f.write(
+                        f"__version__ = '{version}'\n"\
+                        f"__projname__ = '{name}'\n"\
+                        f"__description__ = '{description}'\n"
+                    )
 
     os.system(f"git remote set-url origin {git}")
     os.system(f"git checkout --orphan temp_branch")
     os.system(f"git add -A")
-    os.system(f"git commit -m \"Initial commit by sd-cli with tg-bot-template\"")
+    os.system(f"git commit -m \"Initial commit by sd-cli with {templates[pr_type]['dir']}\"")
     os.system(f"git branch -D master")
     os.system(f"git branch -m master")
     
@@ -80,19 +98,34 @@ def main():
     if os.name == "posix":
         os.system("./venv/bin/python -m pip install -r ./requirements.txt")
     if os.name == "nt":
-        os.system(".\\venv\\Scripts\\python.exe -m pip install -r .\\requirements.txt")    
-
+        os.system(".\\venv\\Scripts\\python.exe -m pip install -r .\\requirements.txt")
+    
     print()
     print()
 
-    print(f"{bcolors.OKGREEN}Finished!{bcolors.ENDC} You can start bot with commands:")
-    print(f"cd {name}")
 
-    if os.name == "posix":
-        print("source ./venv/bin/activate")
-    if os.name == "nt":
-        print(".\\venv\\Scripts\\activate")
+
+    if pr_type == 1:    # backend        
+        print(f"{bcolors.OKGREEN}Finished!{bcolors.ENDC} You can start backend with commands:")
+        print(f"cd {name}")
+
+        if os.name == "posix":
+            print("source ./venv/bin/activate")
+        if os.name == "nt":
+            print(".\\venv\\Scripts\\activate")
+            
+        print(f"python -m app")
         
-    print(f"python -m bot")
+        
 
-main()
+    if pr_type == 0:    # aiogram3 bot
+
+        print(f"{bcolors.OKGREEN}Finished!{bcolors.ENDC} You can start bot with commands:")
+        print(f"cd {name}")
+
+        if os.name == "posix":
+            print("source ./venv/bin/activate")
+        if os.name == "nt":
+            print(".\\venv\\Scripts\\activate")
+            
+        print(f"python -m bot")
